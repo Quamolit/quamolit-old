@@ -1,2 +1,7 @@
 
+build/
+dist/
 src/
+gulpfile.coffee
+index.cirru
+index.html
