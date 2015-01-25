@@ -21,7 +21,7 @@ storeMixins =
 
   initializeActions: ->
     for name, method of @actions
-      dispatcher.register name, (payload) -> @[method] payload
+      dispatcher.register name, (payload) => @[method] payload
 
   initializeGetters: ->
     @get = (name, query) =>
@@ -33,7 +33,7 @@ storeMixins =
       @listeners.push cb
 
   unregister: (cb) ->
-    @listeners = @listeners.filter (f) ->
+    @listeners = @listeners.filter (f) =>
       f isnt cb
 
   change: (data) ->

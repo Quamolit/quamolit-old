@@ -1,5 +1,4 @@
 
-json = require 'cirru-json'
 _ = require 'lodash'
 painter = require 'quamolit-painter'
 
@@ -129,8 +128,6 @@ module.exports = class Manager
       shape.canvas
     # console.log 'paint:', geomerties
     painter.paint geomerties, @node
-
-  json: json.generate
 
   handleEvents: ->
     @node.addEventListener 'click', (event) =>
