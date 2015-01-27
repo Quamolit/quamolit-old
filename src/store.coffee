@@ -9,7 +9,7 @@ dispatcher =
       @events[name].push cb
   dispatch: (name, payload) ->
     if _.isArray @events[name]
-      for cb in @events[name]
+      @events[name].forEach (cb) ->
         cb payload
 
 exports.dispatch = (name, data) ->
@@ -20,7 +20,8 @@ storeMixins =
     @listeners = []
 
   initializeActions: ->
-    for name, method of @actions
+    Object.keys(@actions).forEach (name) =>
+      method = @actions[name]
       dispatcher.register name, (payload) => @[method] payload
 
   initializeGetters: ->

@@ -67,7 +67,7 @@ module.exports = class Component
     @cache.frame = _.cloneDeep @frame
 
   setState: (data) ->
-    console.info "setState at #{@id}:", data
+    # console.info "setState at #{@id}:", data
     _.assign @state, data
     @touchTime = time.now()
     @setPeriod 'changing'

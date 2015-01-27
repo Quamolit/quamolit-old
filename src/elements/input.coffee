@@ -13,8 +13,8 @@ module.exports = creator.create
   getKeyframe: ->
     x: 0
     y: 0
-    vx: 40
-    vy: 20
+    vx: @props.vx or 40
+    vy: @props.vy or 20
     text: @props.text or ''
 
   getEnteringKeyframe: ->

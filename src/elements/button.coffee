@@ -13,8 +13,8 @@ module.exports = creator.create
   getKeyframe: ->
     x: 0
     y: 0
-    vx: 50
-    vy: 20
+    vx: @props.vx or 50
+    vy: @props.vy or 20
 
   getEnteringKeyframe: ->
     x: -40
@@ -40,5 +40,5 @@ module.exports = creator.create
       onClick: @onClick
       color: 'hsl(30,40%,80%)'
       text {},
-        text: 'create button'
+        text: @props.text
         color: 'hsl(0,0%,0%)'

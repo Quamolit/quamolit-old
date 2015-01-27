@@ -139,8 +139,9 @@ module.exports = class Manager
         y: y
       for vm in @vmList.concat().reverse()
         if vm.coveredPoint x, y
-          # console.log vm
-          vm.onClick? ev
+          if event.metaKey
+          then console.log vm
+          else vm.onClick? ev
         break unless ev.bubble
 
   createExternalElement: (id, tag, text) ->
