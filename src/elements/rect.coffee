@@ -7,13 +7,12 @@ module.exports = creator.create
   period: 'stable'
 
   onClick: (event) ->
-    console.log 'onClick'
     @props.onClick? event
 
   coveredPoint: (x, y) ->
-    centerX = @base.x + @canvas.from.x + @layout.x
+    centerX = @base.x + @canvas.from.x + (@layout.x or 0)
+    centerY = @base.y + @canvas.from.y + (@layout.y or 0)
     if Math.abs(x - centerX) > @canvas.vector.x then return no
-    centerY = @base.y + @canvas.from.y + @layout.y
     if Math.abs(y - centerY) > @canvas.vector.y then return no
     return yes
 

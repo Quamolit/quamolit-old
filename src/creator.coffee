@@ -7,7 +7,7 @@ tool = require './util/tool'
 time = require './util/time'
 
 makeIdFrom = (options, props, base) ->
-  return options.id if options.id?
+  return props.id if props?.id?
   # generate id as: c.base.id + (props.key or base.index)
   index = props?.key or base.index
   "#{base.id}/#{options.name}.#{index}"
