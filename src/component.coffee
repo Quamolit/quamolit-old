@@ -11,7 +11,7 @@ module.exports = class Component
     @name = 'default' # name or id must be defined
     @category = 'component' # or shape
     # state machine of component lifecycle
-    @period = 'delay' # [delay entering changing stable leaving]
+    @period = 'delay' # [delay entering changing stable delayLeaving leaving]
     @jumping = no # true during base changing
 
     _.assign @, configs.options

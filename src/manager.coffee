@@ -38,11 +38,14 @@ module.exports = class Manager
             tool.writeIdToNull @vmDict, id
       return if child.category isnt 'component'
       return unless tool.isComponentUnmounted @vmDict, id
-      return if child.period is 'leaving'
+      return if child.period in ['leaving', 'delayLeaving']
       return if child.touchTime >= changeTime
-      console.info 'leaving', id
-      child.setPeriod 'leaving'
-      child.keyframe = child.getLeavingKeyframe()
+      if c.layout.delay
+        child.setPeriod 'delayLeaving'
+      else
+        console.info 'leaving', id
+        child.setPeriod 'leaving'
+        child.keyframe = child.getLeavingKeyframe()
     @refreshVmPeriods()
 
   render: (factory) ->
@@ -65,12 +68,13 @@ module.exports = class Manager
       return unless child.category is 'component'
       switch child.period
         # remove out date elements
-        when 'leaving'  then @handleLeavingNodes  child, now
+        when 'delayLeaving'   then @handleDelayLeavingNodes child, now
+        when 'leaving'        then @handleLeavingNodes  child, now
         # setup new elements
-        when 'delay'    then @handleDelayNodes    child, now
+        when 'delay'          then @handleDelayNodes    child, now
         # animate components
-        when 'entering' then @handleEnteringNodes child, now
-        when 'changing' then @handleChangingNodes child, now
+        when 'entering'       then @handleEnteringNodes child, now
+        when 'changing'       then @handleChangingNodes child, now
       if child.jumping  then @handleJumpingNodes  child, now
     @paintVms()
 
@@ -84,6 +88,11 @@ module.exports = class Manager
           tool.writeIdToNull @vmDict, id
     else
       @updateVmFrame c, now
+
+  handleDelayLeavingNodes: (c, now) ->
+    if (now - c.cache.frameTime) >= (c.layout.delay or 0)
+      c.keyframe = c.getKeyframe()
+      c.setPeriod 'leaving'
 
   handleDelayNodes: (c, now) ->
     if (now - c.cache.frameTime) >= (c.layout.delay or 0)
