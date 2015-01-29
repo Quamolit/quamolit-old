@@ -16,6 +16,7 @@ module.exports = class Manager
   getViewport: ->
     # get node geomerty
     id: ''
+    isViewport: true
     index: 0
     z: [0]
     x: Math.round (@node.width / 2)
@@ -36,7 +37,7 @@ module.exports = class Manager
           if child.touchTime < changeTime
             tool.writeIdToNull @vmDict, id
       return if child.category isnt 'component'
-      return if id.indexOf("#{changeId}/") < 0
+      return unless tool.isComponentUnmounted @vmDict, id
       return if child.period is 'leaving'
       return if child.touchTime >= changeTime
       console.info 'leaving', id

@@ -47,3 +47,13 @@ exports.writeIdToNull = (obj, id) ->
       obj[id][key] = null
     obj[id] = null
     delete obj[id]
+
+isComponentUnmounted = (obj, id) ->
+  component = obj[id]
+  return true unless component?
+  return false if component.base.isViewport
+  baseId = component.base.id
+  return isComponentUnmounted obj, baseId
+
+exports.isComponentUnmounted = isComponentUnmounted
+
