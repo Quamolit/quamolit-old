@@ -57,3 +57,17 @@ isComponentUnmounted = (obj, id) ->
 
 exports.isComponentUnmounted = isComponentUnmounted
 
+isChangeAtParent = (changeId, obj, id) ->
+  # start from here, id is a parent id
+  return true if changeId is id
+  component = obj[id]
+  return false unless component?
+  baseId = component.base.id
+  return isChangeAtParent changeId, obj, baseId
+
+exports.isChangeAtParent = (changeId, obj, id) ->
+  return false if changeId is id # self change
+  component = obj[id]
+  return false unless component?
+  baseId = component.base.id
+  return isChangeAtParent changeId, obj, baseId

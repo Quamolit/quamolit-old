@@ -20,6 +20,7 @@ module.exports = class Component
     @props = configs.props
     @layout = configs.layout
     @manager = configs.manager
+    @period = @configs.period if @configs.period?
 
     @propTypes = {} # only anotation
 
@@ -98,21 +99,21 @@ module.exports = class Component
     @internalRender()
     @manager.differLeavingVms @id, @touchTime
 
-  internalRender: (c, manager) ->
+  internalRender: (renderConfigs) ->
     unless @jumping
       @area = tool.combine @base, @layout
     factory = @render()
     switch @category
       when 'shape'
         @canvas = factory @base, @manager
-        @expandChildren @base.children
+        @expandChildren @base.children, renderConfigs
       when 'component'
         factory = [factory] unless _.isArray factory
         # flattern array, in case of this.base.children
         factory = creator.fillList (_.flatten factory)
-        @expandChildren factory
+        @expandChildren factory, renderConfigs
 
-  expandChildren: (children) ->
+  expandChildren: (children, renderConfigs) ->
     return if @period is 'delay'
     children = [children] unless _.isArray children
     children.map (f, index) =>
@@ -122,7 +123,7 @@ module.exports = class Component
         z: @base.z.concat index
         x: @area.x + (@frame.x or 0)
         y: @area.y + (@frame.y or 0)
-      f childBase, @manager
+      f childBase, @manager, renderConfigs
 
   # listens to updates from store
   connectStoreState: ->

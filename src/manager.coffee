@@ -40,7 +40,7 @@ module.exports = class Manager
       return unless tool.isComponentUnmounted @vmDict, id
       return if child.period in ['leaving', 'delayLeaving']
       return if child.touchTime >= changeTime
-      if c.layout.delay
+      if c.layout.delay and (tool.isChangeAtParent changeId, @vmDict, id)
         child.setPeriod 'delayLeaving'
       else
         console.info 'leaving', id
