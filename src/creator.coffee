@@ -22,7 +22,7 @@ exports.create = create = (options) ->
   # call this in side render
   (layout, props, children...) ->
     # call this when parent is computed
-    (base, manager, renderConfigs) ->
+    (base, manager) ->
       options.props = props
       id = makeIdFrom options, props, base
       # shape uses children, base.children may be used in render()
@@ -33,15 +33,10 @@ exports.create = create = (options) ->
         c.checkBase base
         c.checkProps props
         _.assign c,
-          touchTime: time.now()
           # base will change over time due to changing state
           base: base
           layout: layout
-        c.internalRender {}
       else
-        if renderConfigs.changeId?
-        then childPeriod = 'delay'
-        else childPeriod = 'entering'
         c = new Component
           manager: manager
           id: id
@@ -49,12 +44,11 @@ exports.create = create = (options) ->
           props: props
           layout: layout
           options: options
-          period: childPeriod
 
         manager.vmDict[id] = c
-        # console.info 'creating', id
         # bind method to a working component
         tool.bindMethods c
-        c.internalRender changeId: id
 
+      c.internalRender()
+      c.touchTime = manager.touchTime
       return c

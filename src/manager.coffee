@@ -30,37 +30,30 @@ module.exports = class Manager
     .sort (a, b) ->
       tool.compareZ a.base.z, b.base.z
 
-  differLeavingVms: (changeId, changeTime) ->
-    _.each @vmDict, (child, id) =>
+  markLeavingVms: (changeId) ->
+    Object.keys(@vmDict).forEach (id) =>
+      child = @vmDict[id]
       if child.category is 'shape'
-        if id.indexOf("#{changeId}/") is 0
-          if child.touchTime < changeTime
-            tool.writeIdToNull @vmDict, id
-      return if child.category isnt 'component'
-      return unless tool.isComponentUnmounted @vmDict, id
-      return if child.period in ['leaving', 'delayLeaving']
-      return if child.touchTime >= changeTime
-      if c.layout.delay and (tool.isChangeAtParent changeId, @vmDict, id)
-        child.setPeriod 'delayLeaving'
+        return no if child.touchTime >= @touchTime
+        console.log 'shape is leaving', id
+        tool.writeIdToNull @vmDict, id
       else
+        return no if child.category isnt 'component'
+        return no if child.touchTime >= @touchTime
+        return no if child.period is 'leaving'
         console.info 'leaving', id
         child.setPeriod 'leaving'
         child.keyframe = child.getLeavingKeyframe()
-    @refreshVmPeriods()
 
   render: (factory) ->
     # knots are binded to @vmDict directly
-    factory @getViewport(), @
-    @refreshVmPeriods()
-
-  refreshVmPeriods: ->
-    for id, child of @vmDict
-      if child.category is 'component'
-        if child.period isnt 'stable'
-          requestAnimationFrame @refreshVmPeriods.bind(@)
-          break
+    requestAnimationFrame =>
+      @render factory
 
     now = time.now()
+    @touchTime = now
+    factory @getViewport(), @
+
     _.each @vmDict, (child, id) =>
       # vm already removed might appear
       return unless child?
@@ -68,40 +61,26 @@ module.exports = class Manager
       return unless child.category is 'component'
       switch child.period
         # remove out date elements
-        when 'delayLeaving'   then @handleDelayLeavingNodes child, now
-        when 'leaving'        then @handleLeavingNodes  child, now
-        # setup new elements
-        when 'delay'          then @handleDelayNodes    child, now
+        when 'leaving'  then @handleLeavingNodes  child, now
         # animate components
-        when 'entering'       then @handleEnteringNodes child, now
-        when 'changing'       then @handleChangingNodes child, now
+        when 'entering' then @handleEnteringNodes child, now
+        when 'changing' then @handleChangingNodes child, now
       if child.jumping  then @handleJumpingNodes  child, now
     @paintVms()
+    @markLeavingVms()
 
   handleLeavingNodes: (c, now) ->
     if now - c.cache.frameTime > c.getDuration()
-      target = c.id
-      _.each @vmDict, (child, id) =>
-        if (id.indexOf("#{target}/") is 0) or (id is target)
-          console.info 'deleting', id
-          tool.evalArray child.onDestroyCalls
-          tool.writeIdToNull @vmDict, id
+      console.info 'deleting', c.id
+      tool.evalArray c.onDestroyCalls
+      tool.writeIdToNull @vmDict, c.id
     else
       @updateVmFrame c, now
-
-  handleDelayLeavingNodes: (c, now) ->
-    if (now - c.cache.frameTime) >= (c.layout.delay or 0)
-      c.keyframe = c.getKeyframe()
-      c.setPeriod 'leaving'
-
-  handleDelayNodes: (c, now) ->
-    if (now - c.cache.frameTime) >= (c.layout.delay or 0)
-      c.keyframe = c.getKeyframe()
-      c.setPeriod (if c.getDuration() > 0 then 'entering' else 'stable')
-      tool.evalArray c.onEnterCalls
+      c.internalRender()
 
   handleEnteringNodes: (c, now) ->
     if (now - c.cache.frameTime) > c.getDuration()
+      @frame = @keyframe
       c.setPeriod 'stable'
     else
       @updateVmFrame c, now

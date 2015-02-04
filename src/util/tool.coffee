@@ -13,13 +13,12 @@ exports.bindMethods = (a) ->
       bindedMethod.toString = -> method.toString()
 
 exports.compareZ = compareZ = (a, b) ->
-  a0 = a[0] or -1
-  b0 = b[0] or -1
-  if a.length is 0 and b.length is 0
-    return 0
+  return 0 if a.length is 0 and b.length is 0
+  return -1 if a.length is 0 and b.length > 0
+  return 1 if a.length > 0 and b.length is 0
   switch
-    when a0 < b0 then -1
-    when a0 > b0 then 1
+    when a[0] < b[0] then -1
+    when a[0] > b[0] then 1
     else compareZ a[1..], b[1..]
 
 exports.computeTween = (a, b, ratio, bezierFn) ->
@@ -47,27 +46,3 @@ exports.writeIdToNull = (obj, id) ->
       obj[id][key] = null
     obj[id] = null
     delete obj[id]
-
-isComponentUnmounted = (obj, id) ->
-  component = obj[id]
-  return true unless component?
-  return false if component.base.isViewport
-  baseId = component.base.id
-  return isComponentUnmounted obj, baseId
-
-exports.isComponentUnmounted = isComponentUnmounted
-
-isChangeAtParent = (changeId, obj, id) ->
-  # start from here, id is a parent id
-  return true if changeId is id
-  component = obj[id]
-  return false unless component?
-  baseId = component.base.id
-  return isChangeAtParent changeId, obj, baseId
-
-exports.isChangeAtParent = (changeId, obj, id) ->
-  return false if changeId is id # self change
-  component = obj[id]
-  return false unless component?
-  baseId = component.base.id
-  return isChangeAtParent changeId, obj, baseId

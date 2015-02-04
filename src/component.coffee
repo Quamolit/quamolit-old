@@ -11,7 +11,7 @@ module.exports = class Component
     @name = 'default' # name or id must be defined
     @category = 'component' # or shape
     # state machine of component lifecycle
-    @period = 'delay' # [delay entering changing stable delayLeaving leaving]
+    @period = 'entering' # [entering changing stable leaving]
     @jumping = no # true during base changing
 
     _.assign @, configs.options
@@ -20,12 +20,10 @@ module.exports = class Component
     @props = configs.props
     @layout = configs.layout
     @manager = configs.manager
-    @period = @configs.period if @configs.period?
 
     @propTypes = {} # only anotation
 
     @viewport = @manager.getViewport()
-    @touchTime = time.now()
     @onEnterCalls = []
     @onDestroyCalls = []
 
@@ -40,7 +38,7 @@ module.exports = class Component
 
     # extra state for animations
     @frame = @getEnteringKeyframe()
-    @keyframe = @getEnteringKeyframe()
+    @keyframe = @getKeyframe()
 
     @onNewComponent()
 
@@ -70,19 +68,14 @@ module.exports = class Component
   setState: (data) ->
     # console.info "setState at #{@id}:", data
     _.assign @state, data
-    @touchTime = time.now()
     @setPeriod 'changing'
     @keyframe = @getKeyframe()
-    @internalRender()
-    @manager.differLeavingVms @id, @touchTime
 
   setKeyframe: (data) ->
     _.assign @frame, data
-    @internalRender()
 
   setArea: (data) ->
     _.assign @area, data
-    @internalRender()
 
   checkBase: (base) ->
     return if (base.id is @base.id) and (base.index is @base.index)
@@ -96,25 +89,23 @@ module.exports = class Component
     @props = props
     @setPeriod 'changing'
     @keyframe = @getKeyframe()
-    @internalRender()
-    @manager.differLeavingVms @id, @touchTime
 
-  internalRender: (renderConfigs) ->
+  internalRender: ->
+    @touchTime = @manager.touchTime
     unless @jumping
       @area = tool.combine @base, @layout
     factory = @render()
     switch @category
       when 'shape'
         @canvas = factory @base, @manager
-        @expandChildren @base.children, renderConfigs
+        @expandChildren @base.children
       when 'component'
         factory = [factory] unless _.isArray factory
         # flattern array, in case of this.base.children
         factory = creator.fillList (_.flatten factory)
-        @expandChildren factory, renderConfigs
+        @expandChildren factory
 
-  expandChildren: (children, renderConfigs) ->
-    return if @period is 'delay'
+  expandChildren: (children) ->
     children = [children] unless _.isArray children
     children.map (f, index) =>
       childBase =
@@ -123,7 +114,7 @@ module.exports = class Component
         z: @base.z.concat index
         x: @area.x + (@frame.x or 0)
         y: @area.y + (@frame.y or 0)
-      f childBase, @manager, renderConfigs
+      f childBase, @manager
 
   # listens to updates from store
   connectStoreState: ->
