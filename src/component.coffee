@@ -11,7 +11,7 @@ module.exports = class Component
     @name = 'default' # name or id must be defined
     @category = 'component' # or shape
     # state machine of component lifecycle
-    @period = 'entering' # [entering changing stable leaving]
+    @period = 'stable' # [delay entering changing stable postpone leaving]
     @jumping = no # true during base changing
 
     _.assign @, configs.options
@@ -20,8 +20,6 @@ module.exports = class Component
     @props = configs.props
     @layout = configs.layout
     @manager = configs.manager
-
-    @propTypes = {} # only anotation
 
     @viewport = @manager.getViewport()
     @onEnterCalls = []
@@ -36,17 +34,16 @@ module.exports = class Component
       area: {}
       areaTime: 0
 
+    @onNewComponent()
+
     # extra state for animations
     @frame = @getEnteringKeyframe()
     @keyframe = @getKeyframe()
 
-    @onNewComponent()
-
-    @setPeriod @period
-
   # animation parameters
   getDuration: -> @props?.duration or 400
   getBezier: -> (x) -> x # linear by default
+  getDelay: -> @layout?.delay or 0
 
   # initial states
   getInitialState: -> {}
@@ -61,6 +58,7 @@ module.exports = class Component
 
   # will be binded to manager
   setPeriod: (name) ->
+    debugger if name is 'postpone'
     @period = name
     @cache.frameTime = time.now()
     @cache.frame = _.cloneDeep @frame
@@ -70,12 +68,6 @@ module.exports = class Component
     _.assign @state, data
     @setPeriod 'changing'
     @keyframe = @getKeyframe()
-
-  setKeyframe: (data) ->
-    _.assign @frame, data
-
-  setArea: (data) ->
-    _.assign @area, data
 
   checkBase: (base) ->
     return if (base.id is @base.id) and (base.index is @base.index)

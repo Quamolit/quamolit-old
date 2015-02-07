@@ -27,8 +27,8 @@ exports.create = create = (options) ->
       id = makeIdFrom options, props, base
       # shape uses children, base.children may be used in render()
       base.children = fillList children
-      if manager.vmDict[id]?
-        c = manager.vmDict[id]
+      c = manager.vmDict[id]
+      if c?
         # console.info 'touching', id
         c.checkBase base
         c.checkProps props
@@ -36,6 +36,8 @@ exports.create = create = (options) ->
           # base will change over time due to changing state
           base: base
           layout: layout
+        unless c.period is 'delay'
+          c.internalRender()
       else
         c = new Component
           manager: manager
@@ -48,7 +50,20 @@ exports.create = create = (options) ->
         manager.vmDict[id] = c
         # bind method to a working component
         tool.bindMethods c
+        if c.category is 'shape'
+          c.setPeriod 'stable'
+          c.internalRender()
+        else if base.id in manager.existingVmIds
+          console.log "found base: \t #{id} #{base.id}"
+          c.setPeriod 'entering'
+          c.internalRender()
+        else if c.getDelay() < 5
+          console.info 'delay too short'
+          c.setPeriod 'entering'
+          c.internalRender()
+        else
+          console.log "no base: \t #{id}"
+          c.setPeriod 'delay'
 
-      c.internalRender()
       c.touchTime = manager.touchTime
       return c
