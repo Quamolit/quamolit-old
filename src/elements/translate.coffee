@@ -20,9 +20,15 @@ module.exports = creator.create
   getLeavingKeyframe: ->
     @getKeyframe()
 
-  render: -> [
-    nativeSave {}, {}
-    nativeTranslate {}, @props
-    @base.children
-    nativeRestore {}, {}
-  ]
+  render: ->
+    before = [
+      nativeSave {}, {}
+      nativeTranslate {}, @props
+    ]
+    @base.x = 0
+    @base.y = 0
+    after = [
+      @base.children
+      nativeRestore {}, {}
+    ]
+    before.concat after

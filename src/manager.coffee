@@ -21,14 +21,6 @@ module.exports = class Manager
     x: Math.round (@node.width / 2)
     y: Math.round (@node.height / 2)
 
-  updateVmList: ->
-    list = _.map @vmDict, (knot, id) -> knot
-    @vmList = list
-    .filter (knot) ->
-      knot.category is 'shape'
-    .sort (a, b) ->
-      tool.compareZ a.base.z, b.base.z
-
   findDroppingNodes: (changeId) ->
     Object.keys(@vmDict).forEach (id) =>
       child = @vmDict[id]
@@ -133,13 +125,13 @@ module.exports = class Manager
     c.area = area
 
   paintVms: ->
-    @updateVmList()
-    @geomerties = {}
-    geomerties = @vmList
-    .map (shape) =>
-      @geomerties[shape.id] = shape.canvas
-      shape.canvas
+    geomerties = Object.keys(@vmDict)
+    .map (id) => @vmDict[id]
+    .filter (knot) -> knot.category is 'shape'
+    .sort (a, b) -> tool.compareZ a.base.z, b.base.z
+    .map (shape) => shape.canvas
     .filter _.isObject
+
     # console.log 'paint:', geomerties
     painter.paint geomerties, @node
 
@@ -151,7 +143,13 @@ module.exports = class Manager
         bubble: yes
         x: x
         y: y
-      for vm in @vmList.concat().reverse()
+
+      vms = Object.keys(@vmDict)
+      .map (id) => @vmDict[id]
+      .sort (a, b) -> tool.compareZ a.base.z, b.base.z
+
+      for vm in vms.concat().reverse()
+        continue unless vm.coveredPoint?
         if vm.coveredPoint x, y
           if event.metaKey
           then console.log vm
