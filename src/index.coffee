@@ -3,9 +3,10 @@ creator = require './creator'
 store   = require './store'
 Manager = require './manager'
 
-button  = require './elements/button'
-check   = require './elements/check'
-input   = require './elements/input'
+button  = require './modules/button'
+check   = require './modules/check'
+input   = require './modules/input'
+
 rect    = require './elements/rect'
 text    = require './elements/text'
 

@@ -1,8 +1,8 @@
 
 creator = require '../creator'
 
-rect = require './rect'
-text = require './text'
+rect = require '../elements/rect'
+text = require '../elements/text'
 
 module.exports = creator.create
   name: 'input'
@@ -13,23 +13,19 @@ module.exports = creator.create
   getKeyframe: ->
     x: 0
     y: 0
-    vx: @props.vx or 40
-    vy: @props.vy or 20
+    w: @props.w or 40
+    h: @props.h or 20
     text: @props.text or ''
 
   getEnteringKeyframe: ->
     x: -40
     y: 0
-    vx: 0
-    vy: 0
+    w: 0
+    h: 0
     text: ''
 
   getLeavingKeyframe: ->
-    x: -40
-    y: 0
-    vx: 0
-    vy: 0
-    text: ''
+    @getEnteringKeyframe()
 
   onClick: (event) ->
     @manager.createExternalElement @id, 'input', @props.text
@@ -39,9 +35,8 @@ module.exports = creator.create
 
   render: ->
     rect
-      vector:
-        x: @frame.vx
-        y: @frame.vy
+      w: @frame.w
+      h: @frame.h
     ,
       onClick: @onClick
       color: 'hsl(120,70%,80%)'

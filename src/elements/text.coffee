@@ -14,7 +14,6 @@ module.exports = creator.create
       base:
         x: base.x + (@layout.x or 0)
         y: base.y + (@layout.y or 0)
-      from: @props.from or {x: 0, y: 0}
       text: @props.text
       family: @props.family or 'Optima'
       size: @props.size or 14

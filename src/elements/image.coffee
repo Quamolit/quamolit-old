@@ -2,15 +2,11 @@
 creator = require '../creator'
 
 module.exports = creator.create
-  name: 'rect'
   category: 'shape'
+  name: 'image'
   period: 'stable'
 
-  onClick: (event) ->
-    @props.onClick? event
-
   coveredPoint: (x, y) ->
-    return no unless @props.kind is 'fill'
     centerX = @base.x + (@layout.x or 0)
     centerY = @base.y + (@layout.y or 0)
     if (Math.abs(x - centerX) * 2) > @props.w then return no
@@ -19,12 +15,13 @@ module.exports = creator.create
 
   render: ->
     (base, manager) =>
-      type: 'rect'
+      type: 'image'
       base:
-        x: (@layout.x or 0) + base.x
-        y: (@layout.y or 0) + base.y
+        x: base.x + (@layout.x or 0)
+        y: base.y + (@layout.y or 0)
+      src: @props.src
+      x: @props.x
+      y: @props.y
       w: @props.w
       h: @props.h
-      kind: @props.kind or 'fill'
-      fillStyle: @props.color or 'blue'
-      strokeStyle: @props.color or 'blue'
+      source: @props.source

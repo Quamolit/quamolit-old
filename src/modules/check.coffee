@@ -1,7 +1,7 @@
 
 creator = require '../creator'
 
-rect = require './rect'
+rect = require '../elements/rect'
 
 module.exports = creator.create
   name: 'check'
@@ -23,10 +23,7 @@ module.exports = creator.create
     innerSize: 0
 
   getLeavingKeyframe: ->
-    x: -40
-    y: 0
-    outerSize: 0
-    innerSize: 0
+    @getEnteringKeyframe()
 
   onClick: (event) ->
     @props.onClick event
